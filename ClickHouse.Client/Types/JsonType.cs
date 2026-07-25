@@ -19,16 +19,28 @@ internal class JsonType : ClickHouseType
 
     public override object Read(ExtendedBinaryReader reader)
     {
-        JsonObject root = new();
-
         var nfields = reader.Read7BitEncodedInt();
+
+        // مرحله ۱: خواندن تمام فیلدها در یک آرایه برای امکان مرتب‌سازی
+        var fields = new (string Path, JsonNode Value)[nfields];
         for (int i = 0; i < nfields; i++)
         {
-            var current = root;
-            var name = reader.ReadString();
+            fields[i] = (reader.ReadString(), ReadJsonNode(reader));
+        }
 
-            var pathParts = name.Split('.');
-            foreach (var part in pathParts.SkipLast1(1))
+        // مرحله ۲: مرتب‌سازی الفبایی بر اساس مسیر (Path)
+        // این کار تضمین می‌کند که ترتیب خاصیت‌ها در JsonObject نهایی همیشه یکسان و قابل پیش‌بینی است
+        Array.Sort(fields, (a, b) => string.Compare(a.Path, b.Path, StringComparison.Ordinal));
+
+        JsonObject root = new();
+
+        // مرحله ۳: ساخت JsonObject با ترتیب کانونیکال
+        foreach (var field in fields)
+        {
+            var current = root;
+            var pathParts = field.Path.Split('.');
+
+            foreach (var part in pathParts.SkipLast(1))
             {
                 if (current.ContainsKey(part))
                 {
@@ -41,8 +53,9 @@ internal class JsonType : ClickHouseType
                     current = newCurrent;
                 }
             }
-            current[pathParts.Last()] = ReadJsonNode(reader);
+            current[pathParts.Last()] = field.Value;
         }
+
         return root;
     }
 

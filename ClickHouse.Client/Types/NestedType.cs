@@ -14,22 +14,30 @@ internal class NestedType : TupleType
 
     public override ParameterizedType Parse(SyntaxTreeNode node, Func<SyntaxTreeNode, ClickHouseType> parseClickHouseTypeFunc, TypeSettings settings)
     {
+        var underlyingTypes = node.ChildNodes
+            .Select(ClearFieldName)
+            .Select(parseClickHouseTypeFunc)
+            .ToArray();
+
+        // اگر لیست خالی باشد (مثلاً وقتی نام پایه "Nested" از سیستم خوانده می‌شود)، 
+        // یک نوع پیش‌فرض قرار می‌دهیم تا از خطای NullReferenceException در TupleType جلوگیری شود.
+        if (underlyingTypes.Length == 0)
+        {
+            underlyingTypes = new ClickHouseType[] { new NothingType() };
+        }
+
         return new NestedType
         {
-            UnderlyingTypes = node.ChildNodes.Select(ClearFieldName).Select(parseClickHouseTypeFunc).ToArray(),
+            UnderlyingTypes = underlyingTypes,
         };
     }
 
-    // Try to determine if something which is inside a Nested column is a name-type pair
-    // (param_id UInt8) or a more complex structure (another parameterized type)
-    // We do not currently support multi-word types
     private static SyntaxTreeNode ClearFieldName(SyntaxTreeNode node)
     {
         if (node.ChildNodes.Count > 0)
             return node;
 
         var name = node.Value;
-
         var lastSpaceIndex = name.LastIndexOf(' ');
         return lastSpaceIndex > 0 ? new SyntaxTreeNode { Value = name.Substring(lastSpaceIndex + 1) } : node;
     }

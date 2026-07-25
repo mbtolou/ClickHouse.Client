@@ -70,10 +70,16 @@ internal class TupleType : ParameterizedType
 
     public override ParameterizedType Parse(SyntaxTreeNode node, Func<SyntaxTreeNode, ClickHouseType> parseClickHouseTypeFunc, TypeSettings settings)
     {
-        return new TupleType
+        if (node.ChildNodes.Count == 0)
         {
-            UnderlyingTypes = node.ChildNodes.Select(parseClickHouseTypeFunc).ToArray(),
-        };
+            return new TupleType
+            {
+                UnderlyingTypes = [new NothingType()],
+            };
+        }
+
+        var underlyingTypes = node.ChildNodes.Select(parseClickHouseTypeFunc).ToArray();
+        return new TupleType { UnderlyingTypes = underlyingTypes };
     }
 
     public override string ToString() => $"{Name}({string.Join(",", UnderlyingTypes.Select(t => t.ToString()))})";

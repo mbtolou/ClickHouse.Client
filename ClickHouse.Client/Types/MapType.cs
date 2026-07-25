@@ -37,9 +37,22 @@ internal class MapType : ParameterizedType
 
     public override ParameterizedType Parse(SyntaxTreeNode node, Func<SyntaxTreeNode, ClickHouseType> parseClickHouseTypeFunc, TypeSettings settings)
     {
-        var types = node.ChildNodes.Select(parseClickHouseTypeFunc).ToArray();
-        var result = new MapType() { UnderlyingTypes = Tuple.Create(types[0], types[1]) };
-        return result;
+        // اگر تعداد پارامترها کمتر از ۲ باشد (مثلاً فقط "Map")، از دسترسی به اندیس نامعتبر جلوگیری می‌کنیم
+        if (node.ChildNodes.Count < 2)
+        {
+            return new MapType
+            {
+                UnderlyingTypes = Tuple.Create<ClickHouseType, ClickHouseType>(new NothingType(), new NothingType()),
+            };
+        }
+
+        var keyType = parseClickHouseTypeFunc(node.ChildNodes[0]);
+        var valueType = parseClickHouseTypeFunc(node.ChildNodes[1]);
+
+        return new MapType
+        {
+            UnderlyingTypes = Tuple.Create(keyType, valueType),
+        };
     }
 
     public override object Read(ExtendedBinaryReader reader)

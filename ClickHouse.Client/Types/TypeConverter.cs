@@ -17,7 +17,7 @@ internal static class TypeConverter
     private static readonly Dictionary<string, ClickHouseType> SimpleTypes = [];
     private static readonly Dictionary<string, ParameterizedType> ParameterizedTypes = [];
     private static readonly Dictionary<Type, ClickHouseType> ReverseMapping = [];
-
+    private static readonly Dictionary<string, ClickHouseType> PseudoTypes = [];
     private static readonly Dictionary<string, string> Aliases = new()
     {
         { "BIGINT", "Int64" },
@@ -43,7 +43,20 @@ internal static class TypeConverter
         { "ENUM", "Enum" },
         { "FIXED", "Decimal" },
         { "FLOAT", "Float32" },
-        { "GEOMETRY", "String" },
+        { "QBIT", "String" },
+        { "BFLOAT16", "Float32" },
+        { "GEOMETRY", "Geometry" },
+        { "INTERVALYEAR", "Interval" },
+        { "INTERVALMONTH", "Interval" },
+        { "INTERVALWEEK", "Interval" },
+        { "INTERVALDAY", "Interval" },
+        { "INTERVALHOUR", "Interval" },
+        { "INTERVALMINUTE", "Interval" },
+        { "INTERVALSECOND", "Interval" },
+        { "INTERVALMILLISECOND", "Interval" },
+        { "INTERVALMICROSECOND", "Interval" },
+        { "INTERVALNANOSECOND", "Interval" },
+        { "INTERVALQUARTER", "Interval" },
         { "INET4", "IPv4" },
         { "INET6", "IPv6" },
         { "INT", "Int32" },
@@ -72,6 +85,8 @@ internal static class TypeConverter
         { "NCHAR VARYING", "String" },
         { "NUMERIC", "Decimal" },
         { "NVARCHAR", "String" },
+        { "SIGNED", "Int64" },
+        { "UNSIGNED", "UInt64" },
         { "REAL", "Float32" },
         { "SET", "UInt64" },
         { "SINGLE", "Float32" },
@@ -79,7 +94,6 @@ internal static class TypeConverter
         { "SMALLINT SIGNED", "Int16" },
         { "SMALLINT UNSIGNED", "UInt16" },
         { "TEXT", "String" },
-        { "TIME", "Int64" },
         { "TIMESTAMP", "DateTime" },
         { "TINYBLOB", "String" },
         { "TINYINT", "Int8" },
@@ -136,9 +150,18 @@ internal static class TypeConverter
         RegisterPlainType<StringType>();
         RegisterParameterizedType<FixedStringType>();
 
+        // Geo types
+        RegisterPlainType<LineStringType>();
+        RegisterPlainType<MultiLineStringType>();
+
+        // Interval type
+        // RegisterPlainType<IntervalType>();
+
         // DateTime types
         RegisterPlainType<DateType>();
         RegisterPlainType<Date32Type>();
+        RegisterPlainType<TimeType>();
+        RegisterParameterizedType<Time64Type>();
         RegisterParameterizedType<DateTimeType>();
         RegisterParameterizedType<DateTime32Type>();
         RegisterParameterizedType<DateTime64Type>();
@@ -171,6 +194,7 @@ internal static class TypeConverter
         RegisterPlainType<RingType>();
         RegisterPlainType<PolygonType>();
         RegisterPlainType<MultiPolygonType>();
+        RegisterPlainType<GeometryType>();
 
         // JSON/Object
         RegisterPlainType<JsonType>();
@@ -189,6 +213,8 @@ internal static class TypeConverter
 
         ReverseMapping[typeof(DBNull)] = new NullableType() { UnderlyingType = new NothingType() };
         ReverseMapping[typeof(JsonObject)] = new JsonType();
+
+        PseudoTypes.Add("Interval", new IntervalType());
     }
 
     private static void RegisterPlainType<T>()
@@ -348,6 +374,8 @@ internal static class TypeConverter
                 var _maxDynamicPaths = reader.Read7BitEncodedInt(); // <var_int_max_dynamic_paths>
                 var _maxDynamicTypes = reader.ReadInt32(); // <uint8_max_dynamic_types>
                 return new JsonType(); // TODO JSON settings
+            case 0x32: return new TimeType();
+            case 0x34: return new Time64Type() { Scale = reader.Read7BitEncodedInt() };
             default:
                 break;
         }
@@ -355,3 +383,4 @@ internal static class TypeConverter
         throw new ArgumentOutOfRangeException(nameof(value), $"Unknown type: {value}");
     }
 }
+

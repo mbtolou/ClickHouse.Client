@@ -15,13 +15,13 @@ internal class AggregateFunctionType : ParameterizedType
 
     public override ParameterizedType Parse(SyntaxTreeNode typeName, Func<SyntaxTreeNode, ClickHouseType> parseClickHouseTypeFunc, TypeSettings settings)
     {
-        return new AggregateFunctionType { Function = typeName.ChildNodes.First().Value };
+        // اگر پارامتری وجود نداشته باشد (مثلاً نام پایه "AggregateFunction")، از خطای First() جلوگیری می‌کنیم
+        var functionName = typeName.ChildNodes.Count > 0 ? typeName.ChildNodes.First().Value : "unknown";
+        return new AggregateFunctionType { Function = functionName };
     }
 
     public override object Read(ExtendedBinaryReader reader) => throw new AggregateFunctionException(Function);
-
     public override string ToString() => throw new AggregateFunctionException(Function);
-
     public override void Write(ExtendedBinaryWriter writer, object value) => throw new AggregateFunctionException(Function);
 
     [Serializable]

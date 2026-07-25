@@ -19,3 +19,4 @@ internal class DateType : AbstractDateTimeType
         writer.Write(Convert.ToUInt16(CoerceToDateTimeOffset(value).ToUnixTimeDays()));
     }
 }
+
