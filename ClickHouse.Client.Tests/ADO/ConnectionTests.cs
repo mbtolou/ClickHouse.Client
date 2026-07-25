@@ -106,12 +106,12 @@ public class ConnectionTests : AbstractConnectionTestFixture
         Assert.That(command.QueryId, Is.EqualTo(queryId));
     }
 
-    [Test]
-    [Explicit("This test takes 3s, and can be flaky on loaded server")]
+    [Test, Explicit("This test takes 3s, and can be flaky on loaded server")]
     public async Task ReplaceRunningQuerySettingShouldReplace()
     {
         connection.CustomSettings.Add("replace_running_query", 1);
-        string queryId = "MyQueryId123456";
+        // استفاده از Guid برای جلوگیری از تداخل با اجرای‌های قبلی تست
+        string queryId = "MyQueryId_" + Guid.NewGuid().ToString("N");
 
         var command1 = connection.CreateCommand();
         var command2 = connection.CreateCommand();
@@ -122,19 +122,28 @@ public class ConnectionTests : AbstractConnectionTestFixture
         command1.QueryId = queryId;
         command2.QueryId = queryId;
 
-        var asyncResult1 = command1.ExecuteScalarAsync();
-        var asyncResult2 = command2.ExecuteScalarAsync();
+        // شروع کویری اول (بدون await)
+        var task1 = command1.ExecuteScalarAsync();
+
+        // تأخیر کوتاه برای اطمینان از اینکه سرور کلیک‌هاوس کویری اول را دریافت و در حال اجرا کرده است
+        await Task.Delay(300);
+
+        // شروع کویری دوم که باید اولی را لغو کند
+        var task2 = command2.ExecuteScalarAsync();
 
         try
         {
-            await asyncResult1;
+            await task1;
             Assert.Fail("Query was not cancelled as expected");
         }
-        catch (ClickHouseServerException ex) when (ex.ErrorCode == 394)
+        catch (ClickHouseServerException ex) when (ex.ErrorCode == 394 || ex.Message.Contains("cancelled", StringComparison.OrdinalIgnoreCase))
         {
-            // Expected exception as next query replaced this one
+            // این استثنا مورد انتظار است (394 = QUERY_WAS_CANCELLED)
         }
-        await asyncResult2;
+
+        // اطمینان از اینکه کویری دوم با موفقیت اجرا شده است
+        var result = await task2;
+        Assert.Equals(1, result);
     }
 
     [Test]

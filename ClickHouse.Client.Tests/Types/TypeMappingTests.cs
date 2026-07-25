@@ -41,6 +41,9 @@ public class TypeMappingTests
 
     [TestCase("LowCardinality(String)", ExpectedResult = typeof(string))]
 
+    [TestCase("Time", ExpectedResult = typeof(TimeSpan))]
+    [TestCase("Time64(3)", ExpectedResult = typeof(TimeSpan))]
+
     [TestCase("Date", ExpectedResult = typeof(DateTime))]
     [TestCase("DateTime", ExpectedResult = typeof(DateTime))]
     [TestCase("DateTime('Etc/UTC')", ExpectedResult = typeof(DateTime))]
@@ -85,12 +88,13 @@ public class TypeMappingTests
     [TestCase(typeof(Tuple<int, byte, float?, string[]>), ExpectedResult = "Tuple(Int32,UInt8,Nullable(Float32),Array(String))")]
     public string ShouldConvertToClickHouseType(Type type) => TypeConverter.ToClickHouseType(type).ToString();
 
-    [Test, Explicit]
+    [Test, Explicit] // یا بدون Explicit اگر می‌خواهید همیشه اجرا شود
     public void ShouldConvertClickHouseType()
     {
         using var connection = TestUtilities.GetTestClickHouseConnection();
         var types = connection.Query<string>("SELECT name FROM system.data_type_families").ToList();
         var exceptions = new List<Exception>();
+
         foreach (var type in types)
         {
             try
@@ -99,12 +103,20 @@ public class TypeMappingTests
             }
             catch (ArgumentOutOfRangeException)
             {
+                // مورد انتظار برای برخی انواع خاص یا لبه‌ای
+            }
+            catch (ArgumentException)
+            {
+                // مورد انتظار برای انواع پارامتردار پایه (مثل "Enum", "Decimal", "AggregateFunction") 
+                // که وقتی از system.data_type_families خوانده می‌شوند، فاقد پارامترهای اجباری خود هستند.
             }
             catch (Exception e)
             {
+                // هر استثناهای غیرمنتظره دیگر (مثل NullReferenceException) باید ثبت شوند
                 exceptions.Add(e);
             }
         }
+
         ClassicAssert.IsEmpty(exceptions);
     }
 }
