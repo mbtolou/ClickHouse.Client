@@ -18,7 +18,7 @@ public readonly struct ClickHouseDecimal
     /// <summary>
     /// Sets the global maximum precision of division operations.
     /// </summary>
-    public static int MaxDivisionPrecision = 50;
+    private const int MAX_DIVISION_PRECISION = 50;
 
     public ClickHouseDecimal(decimal value)
         : this()
@@ -46,7 +46,6 @@ public readonly struct ClickHouseDecimal
     {
         if (scale < 0)
             throw new ArgumentException("Scale cannot be <0", nameof(scale));
-        // Normalize(ref mantissa, ref scale);
 
         Mantissa = mantissa;
         Scale = scale;
@@ -227,7 +226,7 @@ public readonly struct ClickHouseDecimal
         var dividend_mantissa = dividend.Mantissa;
         var divisor_mantissa = divisor.Mantissa;
 
-        var bias = MaxDivisionPrecision - (NumberOfDigits(dividend_mantissa) - NumberOfDigits(divisor_mantissa));
+        var bias = MAX_DIVISION_PRECISION - (NumberOfDigits(dividend_mantissa) - NumberOfDigits(divisor_mantissa));
         bias = Math.Max(0, bias);
 
         dividend_mantissa *= BigInteger.Pow(10, bias);

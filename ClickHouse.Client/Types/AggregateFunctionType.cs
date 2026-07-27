@@ -21,7 +21,9 @@ internal class AggregateFunctionType : ParameterizedType
     }
 
     public override object Read(ExtendedBinaryReader reader) => throw new AggregateFunctionException(Function);
+
     public override string ToString() => throw new AggregateFunctionException(Function);
+
     public override void Write(ExtendedBinaryWriter writer, object value) => throw new AggregateFunctionException(Function);
 
     [Serializable]

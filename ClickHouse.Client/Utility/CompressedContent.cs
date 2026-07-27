@@ -15,7 +15,7 @@ public class CompressedContent : HttpContent
     private readonly HttpContent originalContent;
     private readonly ClickHouseCompression compressionMethod;
 
-    public CompressedContent(HttpContent content, ClickHouseCompression compressionMethod)
+    public CompressedContent(HttpContent content, ClickHouseCompression compressionMethod = ClickHouseCompression.Zstd)
     {
         originalContent = content ?? throw new ArgumentNullException(nameof(content));
         this.compressionMethod = compressionMethod;
