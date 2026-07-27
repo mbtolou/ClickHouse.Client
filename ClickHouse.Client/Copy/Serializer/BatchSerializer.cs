@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Text;
 using ClickHouse.Client.Formats;
 
@@ -27,13 +26,14 @@ internal class BatchSerializer : IBatchSerializer
 
     public void Serialize(Batch batch, Stream stream)
     {
-        using var gzipStream = new BufferedStream(new GZipStream(stream, CompressionLevel.Fastest, true), 256 * 1024);
-        using (var textWriter = new StreamWriter(gzipStream, Encoding.UTF8, 4 * 1024, true))
+        // ✅ StreamWriter با leaveOpen: true → stream اصلی باز می‌ماند
+        using (var textWriter = new StreamWriter(stream, Encoding.UTF8, 4 * 1024, leaveOpen: true))
         {
             textWriter.WriteLine(batch.Query);
         }
 
-        using var writer = new ExtendedBinaryWriter(gzipStream);
+        // ✅ BinaryWriter با leaveOpen: true
+        var writer = new ExtendedBinaryWriter(stream, leaveOpen: true);
 
         object[] row = null;
         int counter = 0;
@@ -47,12 +47,15 @@ internal class BatchSerializer : IBatchSerializer
 
                 counter++;
                 if (counter >= batch.Size)
-                    break; // We've reached the batch size
+                    break;
             }
+
+            writer.Flush();
         }
         catch (Exception e)
         {
             throw new ClickHouseBulkCopySerializationException(row, e);
         }
+        // ⚠️ writer را dispose نکنید! stream اصلی باید باز بماند
     }
 }

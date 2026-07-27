@@ -13,9 +13,6 @@ internal class ZstdDecompressionHandler : DelegatingHandler
     protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // به سرور بگو ZSTD می‌خواهیم
-        request.Headers.TryAddWithoutValidation("Accept-Encoding", "zstd");
-
         var response = await base.SendAsync(request, cancellationToken)
                 .ConfigureAwait(false);
 
