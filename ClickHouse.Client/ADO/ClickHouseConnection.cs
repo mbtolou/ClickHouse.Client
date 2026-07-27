@@ -429,3 +429,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
 
     protected override DbCommand CreateDbCommand() => CreateCommand();
 }
+
+
+
+

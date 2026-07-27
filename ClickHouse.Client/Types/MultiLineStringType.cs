@@ -9,7 +9,7 @@ internal class MultiLineStringType : ClickHouseType
 
 	public override object Read(ExtendedBinaryReader reader) => reader.ReadString();
 
-	public override void Write(ExtendedBinaryWriter writer, object value) => writer.Write(value?.ToString() ?? "");
+	public override void Write(ExtendedBinaryWriter writer, object value) => writer.Write(value?.ToString() ?? string.Empty);
 
 	public override string ToString() => "MultiLineString";
 }

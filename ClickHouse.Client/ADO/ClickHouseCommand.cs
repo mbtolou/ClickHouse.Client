@@ -209,7 +209,7 @@ public class ClickHouseCommand : DbCommand, IClickHouseCommand, IDisposable
         content.Headers.ContentType = new MediaTypeHeaderValue("text/sql");
         if (connection.UseCompression)
         {
-            content = new CompressedContent(content, DecompressionMethods.GZip);
+            content = new CompressedContent(content, ClickHouseCompression.Zstd);
         }
 
         postMessage.Content = content;

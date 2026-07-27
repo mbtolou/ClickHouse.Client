@@ -13,24 +13,25 @@ namespace ClickHouse.Client.Utility;
 public class CompressedContent : HttpContent
 {
     private readonly HttpContent originalContent;
-    private readonly DecompressionMethods compressionMethod;
+    private readonly ClickHouseCompression compressionMethod;
 
-    public CompressedContent(HttpContent content, DecompressionMethods compressionMethod)
+    public CompressedContent(HttpContent content, ClickHouseCompression compressionMethod)
     {
         originalContent = content ?? throw new ArgumentNullException(nameof(content));
         this.compressionMethod = compressionMethod;
-
-        if (this.compressionMethod != DecompressionMethods.GZip && this.compressionMethod != DecompressionMethods.Deflate)
-        {
-            throw new ArgumentException($"Compression '{compressionMethod}' is not supported. Valid types: GZip, Deflate", nameof(compressionMethod));
-        }
 
         foreach (var header in originalContent.Headers)
         {
             Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
-        Headers.ContentEncoding.Add(EnumToLowercaseStringCached<DecompressionMethods>.ToString(this.compressionMethod));
+        Headers.ContentEncoding.Add(compressionMethod switch
+        {
+            ClickHouseCompression.GZip => "gzip",
+            ClickHouseCompression.Deflate => "deflate",
+            ClickHouseCompression.Zstd => "zstd",
+            _ => throw new ArgumentException($"Unsupported: {compressionMethod}")
+        });
     }
 
     protected override void Dispose(bool disposing)
@@ -52,9 +53,10 @@ public class CompressedContent : HttpContent
     {
         using Stream compressedStream = compressionMethod switch
         {
-            DecompressionMethods.GZip => new GZipStream(stream, CompressionLevel.Fastest, leaveOpen: true),
-            DecompressionMethods.Deflate => new DeflateStream(stream, CompressionMode.Compress, leaveOpen: true),
-            _ => throw new ArgumentOutOfRangeException(nameof(stream))
+            ClickHouseCompression.GZip => new GZipStream(stream, CompressionLevel.Fastest, leaveOpen: true),
+            ClickHouseCompression.Deflate => new DeflateStream(stream, CompressionMode.Compress, leaveOpen: true),
+            ClickHouseCompression.Zstd => new ZstdSharp.CompressionStream(stream, level: 3, bufferSize: 0, leaveOpen: true),
+            _ => throw new ArgumentOutOfRangeException(nameof(compressionMethod))
         };
 
         await originalContent.CopyToAsync(compressedStream).ConfigureAwait(false);
