@@ -150,6 +150,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
     public override string ServerVersion => serverVersion?.ToString();
 
     public bool UseCompression { get; private set; }
+    public ClickHouseCompression HttpCompression { get; private set; }
 
     public bool UseFormDataParameters { get; private set; }
 
@@ -319,7 +320,14 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
         postMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         if (isCompressed)
         {
-            postMessage.Content.Headers.Add("Content-Encoding", "gzip");
+            postMessage.Content = ConnectionStringBuilder.HttpCompression switch
+            {
+                ClickHouseCompression.Zstd => new CompressedContent(content, ClickHouseCompression.Zstd),
+                ClickHouseCompression.GZip => new CompressedContent(content, ClickHouseCompression.GZip),
+                ClickHouseCompression.Deflate => new CompressedContent(content, ClickHouseCompression.Deflate),
+                _ => content,
+            };
+
         }
         using var response = await HttpClient.SendAsync(postMessage, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false);
         await HandleError(response, sql, activity).ConfigureAwait(false);
@@ -370,8 +378,14 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
         headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/octet-stream"));
         if (UseCompression)
         {
-            headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-            headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
+            var encoding = HttpCompression switch
+            {
+                ClickHouseCompression.Zstd => "zstd",
+                ClickHouseCompression.GZip => "gzip",
+                ClickHouseCompression.Deflate => "deflate",
+                _ => "gzip",
+            };
+            headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(encoding));
         }
     }
 
@@ -389,6 +403,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
                 Path = serverUri?.AbsolutePath,
                 Port = (ushort)serverUri?.Port,
                 Compression = UseCompression,
+                HttpCompression = HttpCompression,
                 UseSession = session != null,
                 Timeout = timeout,
                 UseServerTimezone = useServerTimezone,
@@ -409,9 +424,11 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
             password = builder.Password;
             serverUri = new UriBuilder(builder.Protocol, builder.Host, builder.Port, builder.Path).Uri;
             UseCompression = builder.Compression;
+            HttpCompression = builder.HttpCompression;
             session = builder.UseSession ? builder.SessionId ?? Guid.NewGuid().ToString() : null;
             timeout = builder.Timeout;
             useServerTimezone = builder.UseServerTimezone;
+            useCustomDecimals = builder.UseCustomDecimals;
             useCustomDecimals = builder.UseCustomDecimals;
 
             foreach (var key in builder.Keys.Cast<string>().Where(k => k.StartsWith(CustomSettingPrefix, true, CultureInfo.InvariantCulture)))

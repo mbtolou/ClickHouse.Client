@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClickHouse.Client.Utility;
+using System;
 using System.Data.Common;
 using System.Globalization;
 
@@ -55,6 +56,23 @@ public class ClickHouseConnectionStringBuilder : DbConnectionStringBuilder
     {
         get => GetBooleanOrDefault("Compression", true);
         set => this["Compression"] = value;
+    }
+
+    public ClickHouseCompression HttpCompression
+    {
+        get
+        {
+            if (TryGetValue("HttpCompression", out var value)
+                && Enum.TryParse<ClickHouseCompression>(value as string, ignoreCase: true, out var result))
+            {
+                return result;
+            }
+
+            // اگر Compression=false باشد → None
+            // وگرنه پیش‌فرض GZip (رفتار فعلی)
+            return Compression ? ClickHouseCompression.Zstd : ClickHouseCompression.None;
+        }
+        set => this["HttpCompression"] = value.ToString();
     }
 
     public bool UseSession

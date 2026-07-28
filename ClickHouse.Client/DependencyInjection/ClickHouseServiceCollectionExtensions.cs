@@ -56,7 +56,7 @@ public static class ClickHouseServiceCollectionExtensions
 
                 return new ClickHouseDataSource(connectionString, httpClient)
                 {
-                    Logger = sp.GetService<ILogger<ClickHouseConnection>>()
+                    Logger = sp.GetService<ILogger<ClickHouseConnection>>(),
                 };
             },
             connectionLifetime,
@@ -90,11 +90,13 @@ public static class ClickHouseServiceCollectionExtensions
         string httpClientName = "",
         ServiceLifetime connectionLifetime = ServiceLifetime.Transient,
         ServiceLifetime dataSourceLifetime = ServiceLifetime.Singleton,
-        object serviceKey = null) =>
-        AddClickHouseDataSource(services, (sp, _) => new ClickHouseDataSource(connectionString, httpClientFactory, httpClientName)
+        object serviceKey = null)
+    {
+        return AddClickHouseDataSource(services, (sp, _) => new ClickHouseDataSource(connectionString, httpClientFactory, httpClientName)
         {
-            Logger = sp.GetService<ILogger<ClickHouseConnection>>()
+            Logger = sp.GetService<ILogger<ClickHouseConnection>>(),
         }, connectionLifetime, dataSourceLifetime, serviceKey);
+    }
 
     /// <summary>
     /// Registers a <see cref="ClickHouseDataSource" /> and a <see cref="ClickHouseConnection" /> in the <see cref="IServiceCollection" />.

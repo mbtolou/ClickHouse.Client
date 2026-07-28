@@ -5,11 +5,11 @@ namespace ClickHouse.Client.Types;
 
 internal class MultiLineStringType : ClickHouseType
 {
-	public override Type FrameworkType => typeof(string);
+    public override Type FrameworkType => typeof(string);
 
-	public override object Read(ExtendedBinaryReader reader) => reader.ReadString();
+    public override object Read(ExtendedBinaryReader reader) => reader.ReadString();
 
-	public override void Write(ExtendedBinaryWriter writer, object value) => writer.Write(value?.ToString() ?? string.Empty);
+    public override void Write(ExtendedBinaryWriter writer, object value) => writer.Write(value?.ToString() ?? string.Empty);
 
-	public override string ToString() => "MultiLineString";
+    public override string ToString() => "MultiLineString";
 }

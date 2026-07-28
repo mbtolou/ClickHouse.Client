@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using ClickHouse.Client.Utility;
 
 namespace ClickHouse.Client.Http;
 
@@ -8,32 +9,45 @@ internal class SingleConnectionHttpClientFactory : IHttpClientFactory, IDisposab
 {
     private readonly HttpClientHandler handler;
     private readonly ZstdDecompressionHandler zstdHandler;
-
+    private readonly ClickHouseCompression compression;
     public TimeSpan Timeout { get; init; }
 
-    public SingleConnectionHttpClientFactory()
+    public SingleConnectionHttpClientFactory(ClickHouseCompression compression = ClickHouseCompression.Zstd)
     {
+        this.compression = compression;
+
         handler = new HttpClientHandler()
         {
-            // GZip/Deflate هنوز خودکار handle شود
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             MaxConnectionsPerServer = 1,
         };
 
-        // ZSTD را دستی اضافه کن
-        zstdHandler = new ZstdDecompressionHandler(handler);
+        // فقط اگر GZip/Deflate است، از AutomaticDecompression استفاده کن
+        if (compression is ClickHouseCompression.GZip or ClickHouseCompression.Deflate)
+        {
+            handler.AutomaticDecompression = compression switch
+            {
+                ClickHouseCompression.GZip => DecompressionMethods.GZip,
+                ClickHouseCompression.Deflate => DecompressionMethods.Deflate,
+                _ => DecompressionMethods.None,
+            };
+        }
+
+        // اگر ZSTD است، handler دستی اضافه کن
+        if (compression == ClickHouseCompression.Zstd)
+        {
+            zstdHandler = new ZstdDecompressionHandler(handler);
+        }
     }
 
     public HttpClient CreateClient(string name)
     {
-        // زنجیره: ZstdHandler → HttpClientHandler
-        var zstdHandler = new ZstdDecompressionHandler(handler);
-        return new HttpClient(zstdHandler, false) { Timeout = Timeout };
+        var effectiveHandler = (HttpMessageHandler?)zstdHandler ?? handler;
+        return new HttpClient(effectiveHandler, false) { Timeout = Timeout };
     }
 
     public void Dispose()
     {
-        zstdHandler.Dispose();
+        zstdHandler?.Dispose();
         handler.Dispose();
     }
 }
