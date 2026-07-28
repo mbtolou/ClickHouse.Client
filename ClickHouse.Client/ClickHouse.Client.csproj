@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="PublicAPI\net8.0\PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI\net90\PublicAPI.Shipped.txt" />
   </ItemGroup>
 
 </Project>

@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        framework: ["net8.0", "net6.0"]
+        framework: ["net9.0"]
 
   integration:
     name: Integration Tests
@@ -91,7 +91,7 @@ jobs:
             8.x
 
       - name: Test
-        run: dotnet test ClickHouse.Client.IntegrationTests/ClickHouse.Client.IntegrationTests.csproj --framework net8.0 --configuration Release --verbosity normal --logger GitHubActions  /clp:ErrorsOnly /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:SkipAutoProps=true
+        run: dotnet test ClickHouse.Client.IntegrationTests/ClickHouse.Client.IntegrationTests.csproj --framework net9.0 --configuration Release --verbosity normal --logger GitHubActions  /clp:ErrorsOnly /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:SkipAutoProps=true
         env:
           CLICKHOUSE_CONNECTION: Host=localhost;Port=8123;Username=test;Password=test1234
           CLICKHOUSE_VERSION: latest
