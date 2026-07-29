@@ -55,6 +55,6 @@ public class ClickHouseServerException : DbException
             }
         }
 
-        return int.TryParse(error.Substring(start, end - start), out int result) ? result : null;
+        return int.TryParse(error.AsSpan(start, end - start), out int result) ? result : null;
     }
 }

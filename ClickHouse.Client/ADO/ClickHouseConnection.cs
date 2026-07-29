@@ -150,6 +150,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
     public override string ServerVersion => serverVersion?.ToString();
 
     public bool UseCompression { get; private set; }
+
     public ClickHouseCompression HttpCompression { get; private set; }
 
     public bool UseFormDataParameters { get; private set; }
