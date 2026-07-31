@@ -330,6 +330,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
             };
 
         }
+
         using var response = await HttpClient.SendAsync(postMessage, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false);
         await HandleError(response, sql, activity).ConfigureAwait(false);
     }
