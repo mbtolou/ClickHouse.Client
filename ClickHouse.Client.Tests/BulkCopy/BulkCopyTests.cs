@@ -95,8 +95,8 @@ public class BulkCopyTests : AbstractConnectionTestFixture
     }
 #endif
 
-    [Test]
-    [Explicit("Infinite loop test")]
+    // [Test]
+    // [Explicit("Infinite loop test")]
     public async Task ShouldExecuteMultipleBulkInsertions()
     {
         var sw = new Stopwatch();
@@ -491,7 +491,7 @@ public class BulkCopyTests : AbstractConnectionTestFixture
         await bulkCopy.WriteToServerAsync([[jsonString], [jsonObject]]);
 
         using var reader = await connection.ExecuteReaderAsync($"SELECT * from {targetTable}");
-        while(reader.Read())
+        while (reader.Read())
         {
             Assert.That(reader.GetValue(0), Is.EqualTo(jsonObject).UsingPropertiesComparer());
         }

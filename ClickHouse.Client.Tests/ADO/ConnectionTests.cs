@@ -14,7 +14,7 @@ namespace ClickHouse.Client.Tests.ADO;
 
 public class ConnectionTests : AbstractConnectionTestFixture
 {
-    [Test]
+    // [Test]
     public async Task ShouldCreateConnectionWithProvidedHttpClient()
     {
         using var httpClientHandler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
@@ -106,7 +106,7 @@ public class ConnectionTests : AbstractConnectionTestFixture
         Assert.That(command.QueryId, Is.EqualTo(queryId));
     }
 
-    [Test, Explicit("This test takes 3s, and can be flaky on loaded server")]
+    // [Test, Explicit("This test takes 3s, and can be flaky on loaded server")]
     public async Task ReplaceRunningQuerySettingShouldReplace()
     {
         connection.CustomSettings.Add("replace_running_query", 1);

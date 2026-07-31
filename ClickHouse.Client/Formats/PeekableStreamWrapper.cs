@@ -34,16 +34,22 @@ internal class PeekableStreamWrapper : Stream, IDisposable
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        if (count == 0)
-            return 0;
-        var b = ReadByte();
-        if (b == -1)
-            throw new EndOfStreamException();
-        buffer[offset] = (byte)b;
-        var result = 1;
-        if (count > 1)
-            result += stream.Read(buffer, offset + 1, count - 1);
-        return result;
+        if (count == 0) return 0;
+
+        int totalRead = 0;
+
+        if (hasReadAheadByte)
+        {
+            buffer[offset] = (byte)readAheadByte;
+            hasReadAheadByte = false;
+            offset++;
+            totalRead = 1;
+            count--;
+            if (count == 0) return totalRead;
+        }
+
+        totalRead += stream.Read(buffer, offset, count);
+        return totalRead;
     }
 
     public override long Seek(long offset, SeekOrigin origin) => stream.Seek(offset, origin);
