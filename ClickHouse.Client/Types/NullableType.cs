@@ -6,16 +6,27 @@ namespace ClickHouse.Client.Types;
 
 internal class NullableType : ParameterizedType
 {
-    public ClickHouseType UnderlyingType { get; set; }
+    private ClickHouseType underlyingType;
+    private Type frameworkType;   // کش‌شده — MakeGenericType فقط یک‌بار
 
-    public override Type FrameworkType
+    public ClickHouseType UnderlyingType
     {
-        get
+        get => underlyingType;
+        set
         {
-            var underlyingFrameworkType = UnderlyingType.FrameworkType;
-            return underlyingFrameworkType.IsValueType ? typeof(Nullable<>).MakeGenericType(underlyingFrameworkType) : underlyingFrameworkType;
+            // ✅ fail-fast defensive (بدون lock — نیازی نیست)
+            underlyingType = value ?? throw new ArgumentNullException(nameof(UnderlyingType));
+            frameworkType = CalculateFrameworkType(value);
         }
     }
+
+    private static Type CalculateFrameworkType(ClickHouseType type)
+    {
+        var ft = type.FrameworkType;
+        return ft.IsValueType ? typeof(Nullable<>).MakeGenericType(ft) : ft;
+    }
+
+    public override Type FrameworkType => frameworkType;
 
     public override string Name => "Nullable";
 
@@ -27,9 +38,10 @@ internal class NullableType : ParameterizedType
         };
     }
 
-    public override object Read(ExtendedBinaryReader reader) => reader.ReadByte() > 0 ? DBNull.Value : UnderlyingType.Read(reader);
+    public override object Read(ExtendedBinaryReader reader) =>
+        reader.ReadByte() > 0 ? DBNull.Value : underlyingType.Read(reader);
 
-    public override string ToString() => $"{Name}({UnderlyingType})";
+    public override string ToString() => $"{Name}({underlyingType})";
 
     public override void Write(ExtendedBinaryWriter writer, object value)
     {
@@ -40,7 +52,7 @@ internal class NullableType : ParameterizedType
         else
         {
             writer.Write((byte)0);
-            UnderlyingType.Write(writer, value);
+            underlyingType.Write(writer, value);
         }
     }
 }
