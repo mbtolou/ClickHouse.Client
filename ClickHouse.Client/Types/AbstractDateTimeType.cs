@@ -27,7 +27,11 @@ public static class DateTimeConversions
 
 internal abstract class AbstractDateTimeType : ParameterizedType
 {
-    // بهینه‌سازی ۳: بررسی Kind برای DateTime جهت جلوگیری از تبدیل‌های اضافی
+    private DateTimeZone timeZone;
+
+    // ✅ کش‌شده + مقداردهی اولیه با UTC (حفظ رفتار وقتی setter هرگز صدا زده نمی‌شود)
+    private DateTimeZone timeZoneOrUtc = DateTimeZone.Utc;
+
     public DateTimeOffset CoerceToDateTimeOffset(object value)
     {
         return value switch
@@ -36,12 +40,7 @@ internal abstract class AbstractDateTimeType : ParameterizedType
             DateOnly date => new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, TimeSpan.Zero),
 #endif
             DateTimeOffset v => v,
-
-            // اگر DateTime از قبل UTC باشد، نیازی به ساخت LocalDateTime نیست
-            DateTime dt => dt.Kind == DateTimeKind.Utc
-                ? Instant.FromDateTimeUtc(dt).InZone(TimeZoneOrUtc).ToDateTimeOffset()
-                : TimeZoneOrUtc.AtLeniently(LocalDateTime.FromDateTime(dt)).ToDateTimeOffset(),
-
+            DateTime dt => timeZoneOrUtc.AtLeniently(LocalDateTime.FromDateTime(dt)).ToDateTimeOffset(),
             OffsetDateTime o => o.ToDateTimeOffset(),
             ZonedDateTime z => z.ToDateTimeOffset(),
             Instant i => ToDateTimeOffset(i),
@@ -51,25 +50,35 @@ internal abstract class AbstractDateTimeType : ParameterizedType
 
     public override Type FrameworkType => typeof(DateTime);
 
-    public DateTimeZone TimeZone { get; set; }
+    public DateTimeZone TimeZone
+    {
+        get => timeZone;
+        set
+        {
+            timeZone = value;
+            timeZoneOrUtc = value ?? DateTimeZone.Utc;   // ✅ محاسبه یک‌باره در زمان set
+        }
+    }
 
-    // بهینه‌سازی ۴: کش کردن مقدار UTC برای جلوگیری از بررسی null در هر بار فراخوانی
-    public DateTimeZone TimeZoneOrUtc => TimeZone ?? DateTimeZone.Utc;
+    // ✅ خواندن مستقیم از فیلد — بدون get_TimeZone، بدون null-check
+    public DateTimeZone TimeZoneOrUtc => timeZoneOrUtc;
 
-    public override string ToString() => TimeZone == null ? Name : $"{Name}({TimeZone.Id})";
+    public override string ToString() => timeZone == null ? $"{Name}" : $"{Name}({timeZone.Id})";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private DateTimeOffset ToDateTimeOffset(Instant instant) => instant.InZone(TimeZoneOrUtc).ToDateTimeOffset();
+    private DateTimeOffset ToDateTimeOffset(Instant instant) => instant.InZone(timeZoneOrUtc).ToDateTimeOffset();
 
     // بهینه‌سازی ۵: Short-circuit کردن برای حالت UTC
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DateTime ToDateTime(Instant instant)
     {
-        // اگر TimeZone تنظیم نشده باشد (یعنی UTC باشد)، اصلاً نیازی به InZone نیست
-        if (TimeZone == null)
+        var zone = timeZoneOrUtc;
+
+        // ✅ مسیر سریع برای UTC (رایج‌ترین حالت در ClickHouse)
+        // DateTimeZone.Utc یک singleton است، پس این یک reference comparison سریع است
+        if (zone == DateTimeZone.Utc)
             return instant.ToDateTimeUtc();
 
-        var zonedDateTime = instant.InZone(TimeZone);
+        var zonedDateTime = instant.InZone(zone);
         return zonedDateTime.Offset.Ticks == 0
             ? zonedDateTime.ToDateTimeUtc()
             : zonedDateTime.ToDateTimeUnspecified();

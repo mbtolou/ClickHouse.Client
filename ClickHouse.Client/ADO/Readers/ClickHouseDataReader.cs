@@ -18,7 +18,7 @@ using ClickHouse.Client.Utility;
 
 namespace ClickHouse.Client.ADO.Readers;
 
-public class ClickHouseDataReader : DbDataReader, IEnumerator<IDataReader>, IEnumerable<IDataReader>, IDataRecord
+public sealed class ClickHouseDataReader : DbDataReader, IEnumerator<IDataReader>, IEnumerable<IDataReader>, IDataRecord
 {
     private const int BufferSize = 512 * 1024;
 
@@ -73,7 +73,6 @@ public class ClickHouseDataReader : DbDataReader, IEnumerator<IDataReader>, IEnu
 
     internal ClickHouseType GetClickHouseType(int ordinal) => _rawTypes[ordinal];
 
-    // ✅ indexer مستقیم به فیلد — GetValue (یک virtual call) حذف شد
     public override object this[int ordinal] => _currentRow[ordinal];
 
     public override object this[string name] => _currentRow[GetOrdinal(name)];
@@ -103,7 +102,7 @@ public class ClickHouseDataReader : DbDataReader, IEnumerator<IDataReader>, IEnu
 
     public override DateTime GetDateTime(int ordinal) => (DateTime)_currentRow[ordinal];
 
-    public virtual DateTimeOffset GetDateTimeOffset(int ordinal) => GetEffectiveClickHouseType(ordinal) is AbstractDateTimeType adt ?
+    public DateTimeOffset GetDateTimeOffset(int ordinal) => GetEffectiveClickHouseType(ordinal) is AbstractDateTimeType adt ?
         adt.CoerceToDateTimeOffset(GetDateTime(ordinal)) : throw new InvalidCastException();
 
     public override decimal GetDecimal(int ordinal)

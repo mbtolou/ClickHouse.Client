@@ -41,18 +41,9 @@ internal class ExtendedBinaryReader : BinaryReader
     /// <exception cref="EndOfStreamException">thrown if requested number of bytes is not available</exception>
     public override int Read(byte[] buffer, int index, int count)
     {
-        int bytesRead = 0;
-        do
-        {
-            int read = base.Read(buffer, index + bytesRead, count - bytesRead);
-            bytesRead += read;
-            if (read == 0 && bytesRead < count)
-            {
-                throw new EndOfStreamException($"Expected to read {count} bytes, got {bytesRead}");
-            }
-        }
-        while (bytesRead < count);
-
+        int bytesRead = base.Read(buffer, index, count);
+        if (bytesRead < count)
+            throw new EndOfStreamException($"Expected to read {count} bytes, got {bytesRead}");
         return bytesRead;
     }
 
@@ -66,6 +57,8 @@ internal class ExtendedBinaryReader : BinaryReader
 
         if (byteCount == 0)
             return string.Empty;
+        if (byteCount < 0)                                   // ✅ چک صحت (مثل BinaryReader استاندارد)
+            throw new IOException("Invalid string length.");
 
         // ✅ مسیر سریع: stringهای کوتاه با stack allocation (صفر GC pressure)
         // اکثر stringهای ClickHouse (نام ستون، مقادیر enum، کدها) کوتاه هستند
@@ -73,10 +66,10 @@ internal class ExtendedBinaryReader : BinaryReader
         {
             Span<byte> buffer = stackalloc byte[byteCount];
             ReadExact(buffer);
-            return Encoding.UTF8.GetString(buffer);   // overload Span در .NET Core 2.1+
+            return Encoding.UTF8.GetString(buffer);
         }
 
-        // ✅ مسیر stringهای بلند: ArrayPool به جای new byte[]
+        // stringهای بلند: ArrayPool به جای new byte[]
         byte[] rented = ArrayPool<byte>.Shared.Rent(byteCount);
         try
         {
@@ -89,18 +82,17 @@ internal class ExtendedBinaryReader : BinaryReader
         }
     }
 
-    // متد کمکی: خواندن دقیق N بایت (Stream.Read ممکن است کمتر برگرداند)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadExact(Span<byte> buffer)
     {
-        int totalRead = 0;
-        while (totalRead < buffer.Length)
+        int read = BaseStream.Read(buffer);
+        if (read == buffer.Length) return;          // fast-path: ۹۹٪ موارد
+        if (read == 0) throw new EndOfStreamException();
+        do
         {
-            int read = BaseStream.Read(buffer.Slice(totalRead));
-            if (read == 0)
-                throw new EndOfStreamException();
-            totalRead += read;
-        }
+            int r = BaseStream.Read(buffer.Slice(read));
+            if (r == 0) throw new EndOfStreamException();
+            read += r;
+        } while (read < buffer.Length);
     }
-
 }
