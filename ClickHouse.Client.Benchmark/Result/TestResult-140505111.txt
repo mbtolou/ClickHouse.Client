@@ -1,0 +1,331 @@
+
+Mean = 34.008 ms, StdErr = 0.553 ms (1.63%), N = 3, StdDev = 0.958 ms
+Min = 33.005 ms, Q1 = 33.555 ms, Median = 34.106 ms, Q3 = 34.509 ms, Max = 34.913 ms
+IQR = 0.954 ms, LowerFence = 32.124 ms, UpperFence = 35.940 ms
+ConfidenceInterval = [16.535 ms; 51.481 ms] (CI 99.9%), Margin = 17.473 ms (51.38% of Mean)
+Skewness = -0.1, Kurtosis = 0.67, MValue = 2
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2026-08-02 8:20 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+Run time: 00:02:27 (147.66 sec), executed benchmarks: 16
+
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts\results\BenchmarkRun-joined-2026-08-02-08-20-12-report.csv
+  BenchmarkDotNet.Artifacts\results\BenchmarkRun-joined-2026-08-02-08-20-12-report-github.md
+  BenchmarkDotNet.Artifacts\results\BenchmarkRun-joined-2026-08-02-08-20-12-report.html
+
+// * Detailed results *
+CompressionBenchmark.NoCompression: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3)
+Runtime = ; GC =
+Mean = 0.898 ns, StdErr = 0.022 ns (2.49%), N = 3, StdDev = 0.039 ns
+Min = 0.855 ns, Q1 = 0.884 ns, Median = 0.913 ns, Q3 = 0.920 ns, Max = 0.928 ns
+IQR = 0.037 ns, LowerFence = 0.829 ns, UpperFence = 0.975 ns
+ConfidenceInterval = [0.191 ns; 1.605 ns] (CI 99.9%), Margin = 0.707 ns (78.68% of Mean)
+Skewness = -0.32, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[0.819 ns ; 0.885 ns) | @
+[0.885 ns ; 0.963 ns) | @@
+---------------------------------------------------
+
+CompressionBenchmark.Zstd_Level3: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3)
+Runtime = ; GC =
+Mean = 101.797 ms, StdErr = 0.928 ms (0.91%), N = 3, StdDev = 1.607 ms
+Min = 100.843 ms, Q1 = 100.869 ms, Median = 100.895 ms, Q3 = 102.274 ms, Max = 103.652 ms
+IQR = 1.405 ms, LowerFence = 98.762 ms, UpperFence = 104.380 ms
+ConfidenceInterval = [72.480 ms; 131.113 ms] (CI 99.9%), Margin = 29.317 ms (28.80% of Mean)
+Skewness = 0.38, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[100.785 ms ; 103.710 ms) | @@@
+---------------------------------------------------
+
+CompressionBenchmark.GZip_Fastest: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3)
+Runtime = ; GC =
+Mean = 104.188 ms, StdErr = 1.720 ms (1.65%), N = 3, StdDev = 2.980 ms
+Min = 101.849 ms, Q1 = 102.511 ms, Median = 103.172 ms, Q3 = 105.358 ms, Max = 107.543 ms
+IQR = 2.847 ms, LowerFence = 98.241 ms, UpperFence = 109.628 ms
+ConfidenceInterval = [49.830 ms; 158.546 ms] (CI 99.9%), Margin = 54.358 ms (52.17% of Mean)
+Skewness = 0.3, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[ 99.799 ms ; 105.222 ms) | @@
+[105.222 ms ; 110.254 ms) | @
+---------------------------------------------------
+
+CompressionBenchmark.Zstd_Decompress: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3)
+Runtime = ; GC =
+Mean = 133.970 ms, StdErr = 5.040 ms (3.76%), N = 3, StdDev = 8.730 ms
+Min = 126.612 ms, Q1 = 129.146 ms, Median = 131.679 ms, Q3 = 137.648 ms, Max = 143.617 ms
+IQR = 8.502 ms, LowerFence = 116.393 ms, UpperFence = 150.401 ms
+ConfidenceInterval = [-25.303 ms; 293.242 ms] (CI 99.9%), Margin = 159.273 ms (118.89% of Mean)
+Skewness = 0.24, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[121.201 ms ; 137.091 ms) | @@
+[137.091 ms ; 151.561 ms) | @
+---------------------------------------------------
+
+CompressionBenchmark.GZip_Decompress: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3)
+Runtime = ; GC =
+Mean = 167.112 ms, StdErr = 1.159 ms (0.69%), N = 3, StdDev = 2.008 ms
+Min = 165.566 ms, Q1 = 165.977 ms, Median = 166.388 ms, Q3 = 167.885 ms, Max = 169.382 ms
+IQR = 1.908 ms, LowerFence = 163.115 ms, UpperFence = 170.747 ms
+ConfidenceInterval = [130.473 ms; 203.751 ms] (CI 99.9%), Margin = 36.639 ms (21.92% of Mean)
+Skewness = 0.31, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[164.150 ms ; 167.805 ms) | @@
+[167.805 ms ; 171.209 ms) | @
+---------------------------------------------------
+
+CompressionBenchmark.Zstd_Level9: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3)
+Runtime = ; GC =
+Mean = 659.411 ms, StdErr = 11.903 ms (1.81%), N = 3, StdDev = 20.617 ms
+Min = 645.413 ms, Q1 = 647.573 ms, Median = 649.734 ms, Q3 = 666.410 ms, Max = 683.087 ms
+IQR = 18.837 ms, LowerFence = 619.318 ms, UpperFence = 694.665 ms
+ConfidenceInterval = [283.277 ms; 1,035.545 ms] (CI 99.9%), Margin = 376.134 ms (57.04% of Mean)
+Skewness = 0.37, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[626.651 ms ; 666.336 ms) | @@
+[666.336 ms ; 701.849 ms) | @
+---------------------------------------------------
+
+SelectColumn.SelectDate: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 16.896 ms, StdErr = 0.106 ms (0.63%), N = 3, StdDev = 0.184 ms
+Min = 16.783 ms, Q1 = 16.790 ms, Median = 16.797 ms, Q3 = 16.953 ms, Max = 17.109 ms
+IQR = 0.163 ms, LowerFence = 16.547 ms, UpperFence = 17.197 ms
+ConfidenceInterval = [13.544 ms; 20.249 ms] (CI 99.9%), Margin = 3.353 ms (19.84% of Mean)
+Skewness = 0.38, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[16.779 ms ; 17.113 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectFloat64: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 21.082 ms, StdErr = 0.216 ms (1.02%), N = 3, StdDev = 0.374 ms
+Min = 20.726 ms, Q1 = 20.887 ms, Median = 21.048 ms, Q3 = 21.260 ms, Max = 21.471 ms
+IQR = 0.373 ms, LowerFence = 20.328 ms, UpperFence = 21.819 ms
+ConfidenceInterval = [14.264 ms; 27.900 ms] (CI 99.9%), Margin = 6.818 ms (32.34% of Mean)
+Skewness = 0.09, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[20.547 ms ; 21.227 ms) | @@
+[21.227 ms ; 21.811 ms) | @
+---------------------------------------------------
+
+SelectColumn.SelectString: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 22.136 ms, StdErr = 0.275 ms (1.24%), N = 3, StdDev = 0.477 ms
+Min = 21.586 ms, Q1 = 21.986 ms, Median = 22.386 ms, Q3 = 22.411 ms, Max = 22.437 ms
+IQR = 0.425 ms, LowerFence = 21.348 ms, UpperFence = 23.049 ms
+ConfidenceInterval = [13.434 ms; 30.838 ms] (CI 99.9%), Margin = 8.702 ms (39.31% of Mean)
+Skewness = -0.38, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[21.577 ms ; 22.446 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectInt64: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 25.507 ms, StdErr = 0.146 ms (0.57%), N = 3, StdDev = 0.253 ms
+Min = 25.233 ms, Q1 = 25.394 ms, Median = 25.556 ms, Q3 = 25.644 ms, Max = 25.732 ms
+IQR = 0.249 ms, LowerFence = 25.021 ms, UpperFence = 26.018 ms
+ConfidenceInterval = [20.895 ms; 30.119 ms] (CI 99.9%), Margin = 4.612 ms (18.08% of Mean)
+Skewness = -0.19, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[25.003 ms ; 25.900 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectUInt64: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 26.302 ms, StdErr = 0.223 ms (0.85%), N = 3, StdDev = 0.386 ms
+Min = 25.864 ms, Q1 = 26.159 ms, Median = 26.455 ms, Q3 = 26.522 ms, Max = 26.588 ms
+IQR = 0.362 ms, LowerFence = 25.615 ms, UpperFence = 27.065 ms
+ConfidenceInterval = [19.265 ms; 33.339 ms] (CI 99.9%), Margin = 7.037 ms (26.75% of Mean)
+Skewness = -0.33, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[25.513 ms ; 26.171 ms) | @
+[26.171 ms ; 26.939 ms) | @@
+---------------------------------------------------
+
+SelectColumn.SelectUInt32: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 29.233 ms, StdErr = 0.179 ms (0.61%), N = 3, StdDev = 0.310 ms
+Min = 29.013 ms, Q1 = 29.056 ms, Median = 29.099 ms, Q3 = 29.343 ms, Max = 29.588 ms
+IQR = 0.287 ms, LowerFence = 28.625 ms, UpperFence = 29.774 ms
+ConfidenceInterval = [23.578 ms; 34.889 ms] (CI 99.9%), Margin = 5.656 ms (19.35% of Mean)
+Skewness = 0.35, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[28.731 ms ; 29.870 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectInt32: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 29.604 ms, StdErr = 0.155 ms (0.53%), N = 3, StdDev = 0.269 ms
+Min = 29.405 ms, Q1 = 29.451 ms, Median = 29.498 ms, Q3 = 29.704 ms, Max = 29.911 ms
+IQR = 0.253 ms, LowerFence = 29.072 ms, UpperFence = 30.084 ms
+ConfidenceInterval = [24.692 ms; 34.517 ms] (CI 99.9%), Margin = 4.912 ms (16.59% of Mean)
+Skewness = 0.33, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[29.160 ms ; 30.156 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectDate32: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 30.145 ms, StdErr = 0.161 ms (0.53%), N = 3, StdDev = 0.279 ms
+Min = 29.882 ms, Q1 = 29.998 ms, Median = 30.113 ms, Q3 = 30.276 ms, Max = 30.438 ms
+IQR = 0.278 ms, LowerFence = 29.581 ms, UpperFence = 30.692 ms
+ConfidenceInterval = [25.055 ms; 35.234 ms] (CI 99.9%), Margin = 5.090 ms (16.88% of Mean)
+Skewness = 0.11, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[29.698 ms ; 30.692 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectNullableInt32: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 30.881 ms, StdErr = 0.241 ms (0.78%), N = 3, StdDev = 0.417 ms
+Min = 30.425 ms, Q1 = 30.700 ms, Median = 30.975 ms, Q3 = 31.109 ms, Max = 31.244 ms
+IQR = 0.409 ms, LowerFence = 30.086 ms, UpperFence = 31.723 ms
+ConfidenceInterval = [23.269 ms; 38.494 ms] (CI 99.9%), Margin = 7.612 ms (24.65% of Mean)
+Skewness = -0.21, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[30.046 ms ; 30.730 ms) | @
+[30.730 ms ; 31.624 ms) | @@
+---------------------------------------------------
+
+SelectColumn.SelectFloat32: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 31.050 ms, StdErr = 0.200 ms (0.65%), N = 3, StdDev = 0.347 ms
+Min = 30.719 ms, Q1 = 30.870 ms, Median = 31.020 ms, Q3 = 31.216 ms, Max = 31.412 ms
+IQR = 0.346 ms, LowerFence = 30.350 ms, UpperFence = 31.735 ms
+ConfidenceInterval = [24.716 ms; 37.384 ms] (CI 99.9%), Margin = 6.334 ms (20.40% of Mean)
+Skewness = 0.09, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[30.554 ms ; 31.728 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectDateTime: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 33.253 ms, StdErr = 0.339 ms (1.02%), N = 3, StdDev = 0.587 ms
+Min = 32.629 ms, Q1 = 32.983 ms, Median = 33.338 ms, Q3 = 33.566 ms, Max = 33.793 ms
+IQR = 0.582 ms, LowerFence = 32.110 ms, UpperFence = 34.439 ms
+ConfidenceInterval = [22.552 ms; 43.954 ms] (CI 99.9%), Margin = 10.701 ms (32.18% of Mean)
+Skewness = -0.14, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[32.096 ms ; 33.032 ms) | @
+[33.032 ms ; 34.099 ms) | @@
+---------------------------------------------------
+
+SelectColumn.SelectTuple: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 34.008 ms, StdErr = 0.553 ms (1.63%), N = 3, StdDev = 0.958 ms
+Min = 33.005 ms, Q1 = 33.555 ms, Median = 34.106 ms, Q3 = 34.509 ms, Max = 34.913 ms
+IQR = 0.954 ms, LowerFence = 32.124 ms, UpperFence = 35.940 ms
+ConfidenceInterval = [16.535 ms; 51.481 ms] (CI 99.9%), Margin = 17.473 ms (51.38% of Mean)
+Skewness = -0.1, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[32.134 ms ; 33.638 ms) | @
+[33.638 ms ; 35.381 ms) | @@
+---------------------------------------------------
+
+SelectColumn.SelectDecimal64: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 40.109 ms, StdErr = 0.160 ms (0.40%), N = 3, StdDev = 0.278 ms
+Min = 39.900 ms, Q1 = 39.951 ms, Median = 40.002 ms, Q3 = 40.213 ms, Max = 40.424 ms
+IQR = 0.262 ms, LowerFence = 39.558 ms, UpperFence = 40.606 ms
+ConfidenceInterval = [35.041 ms; 45.177 ms] (CI 99.9%), Margin = 5.068 ms (12.63% of Mean)
+Skewness = 0.33, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[39.648 ms ; 40.677 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectDecimal128: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 44.051 ms, StdErr = 0.427 ms (0.97%), N = 3, StdDev = 0.739 ms
+Min = 43.294 ms, Q1 = 43.691 ms, Median = 44.089 ms, Q3 = 44.430 ms, Max = 44.771 ms
+IQR = 0.738 ms, LowerFence = 42.584 ms, UpperFence = 45.537 ms
+ConfidenceInterval = [30.567 ms; 57.536 ms] (CI 99.9%), Margin = 13.485 ms (30.61% of Mean)
+Skewness = -0.05, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[42.621 ms ; 43.757 ms) | @
+[43.757 ms ; 45.102 ms) | @@
+---------------------------------------------------
+
+SelectColumn.SelectDecimal256: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 45.639 ms, StdErr = 0.312 ms (0.68%), N = 3, StdDev = 0.540 ms
+Min = 45.049 ms, Q1 = 45.403 ms, Median = 45.758 ms, Q3 = 45.934 ms, Max = 46.110 ms
+IQR = 0.530 ms, LowerFence = 44.608 ms, UpperFence = 46.729 ms
+ConfidenceInterval = [35.780 ms; 55.497 ms] (CI 99.9%), Margin = 9.858 ms (21.60% of Mean)
+Skewness = -0.21, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[44.557 ms ; 46.601 ms) | @@@
+---------------------------------------------------
+
+SelectColumn.SelectArray: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 47.903 ms, StdErr = 1.496 ms (3.12%), N = 3, StdDev = 2.591 ms
+Min = 45.516 ms, Q1 = 46.525 ms, Median = 47.534 ms, Q3 = 49.096 ms, Max = 50.658 ms
+IQR = 2.571 ms, LowerFence = 42.668 ms, UpperFence = 52.952 ms
+ConfidenceInterval = [0.637 ms; 95.169 ms] (CI 99.9%), Margin = 47.266 ms (98.67% of Mean)
+Skewness = 0.14, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[44.167 ms ; 48.883 ms) | @@
+[48.883 ms ; 53.016 ms) | @
+---------------------------------------------------
+
+BulkInsertColumn.BulkInsertInt32: ShortRun(Toolchain=InProcessEmitToolchain, IterationCount=3, LaunchCount=1, WarmupCount=3) [Count=100000]
+Runtime = ; GC =
+Mean = 631.002 ms, StdErr = 18.860 ms (2.99%), N = 3, StdDev = 32.667 ms
+Min = 611.758 ms, Q1 = 612.143 ms, Median = 612.527 ms, Q3 = 640.623 ms, Max = 668.720 ms
+IQR = 28.481 ms, LowerFence = 569.422 ms, UpperFence = 683.344 ms
+ConfidenceInterval = [35.033 ms; 1,226.970 ms] (CI 99.9%), Margin = 595.969 ms (94.45% of Mean)
+Skewness = 0.38, Kurtosis = 0.67, MValue = 2
+-------------------- Histogram --------------------
+[610.511 ms ; 669.967 ms) | @@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet v0.15.1, Windows 11 (10.0.26200.8655)
+11th Gen Intel Core i9-11900 2.50GHz, 1 CPU, 16 logical and 8 physical cores
+.NET SDK 10.0.400-preview.0.26322.102
+  [Host] : .NET 9.0.17 (9.0.1726.26416), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+
+Job=ShortRun  Toolchain=InProcessEmitToolchain  IterationCount=3
+LaunchCount=1  WarmupCount=3
+
+| Type                 | Method                 | Count  | Mean                | Error               | StdDev             | Ratio          | RatioSD       | Gen0      | Gen1      | Gen2      | Allocated   | Alloc Ratio |
+|--------------------- |--------------------    |------- |--------------------:|--------------------:|-------------------:|---------------:|--------------:|----------:|----------:|----------:|------------:|------------:|
+| CompressionBenchmark | Zstd_Decompress        | ?      | HighEntropy         |            97.33 ms |         235.753 ms |      12.922 ms |             ? |         ? |  285.7143 |  285.7143 |    285.7143 |   157.85 MB |
+| CompressionBenchmark | GZip_Decompress        | ?      | HighEntropy         |           135.97 ms |          31.965 ms |       1.752 ms |             ? |         ? | 1000.0000 | 1000.0000 |   1000.0000 |    334.8 MB |
+| CompressionBenchmark | Zstd_L1_Compress       | ?      | HighEntropy         |           180.66 ms |          74.043 ms |       4.059 ms |             ? |         ? |         - |         - |           - |   112.97 MB |
+| CompressionBenchmark | GZip_Fastest_Compress  | ?      | HighEntropy         |           287.11 ms |           8.441 ms |       0.463 ms |             ? |         ? |         - |         - |           - |   165.62 MB |
+| CompressionBenchmark | Zstd_L3_Compress       | ?      | HighEntropy         |           429.16 ms |         332.711 ms |      18.237 ms |             ? |         ? |         - |         - |           - |   111.19 MB |
+| CompressionBenchmark | GZip_Optimal_Compress  | ?      | HighEntropy         |         1,181.17 ms |         173.005 ms |       9.483 ms |             ? |         ? |         - |         - |           - |    95.23 MB |
+| CompressionBenchmark | Zstd_L9_Compress       | ?      | HighEntropy         |         1,636.86 ms |       1,518.492 ms |      83.234 ms |             ? |         ? |         - |         - |           - |    109.7 MB |
+| CompressionBenchmark | GZip_Smallest_Compress | ?      | HighEntropy         |         2,105.42 ms |         820.325 ms |      44.965 ms |             ? |         ? |         - |         - |           - |    94.79 MB |
+|                      |                        |        |                     |                     |                    |                |               |           |           |           |             |             |
+| CompressionBenchmark | Zstd_Decompress        | ?      | Realistic           |            81.00 ms |           4.450 ms |       0.244 ms |             ? |         ? |  285.7143 |  285.7143 |    285.7143 |   154.68 MB |
+| CompressionBenchmark | GZip_Decompress        | ?      | Realistic           |           133.34 ms |          26.271 ms |       1.440 ms |             ? |         ? | 1000.0000 | 1000.0000 |   1000.0000 |   333.22 MB |
+| CompressionBenchmark | Zstd_L1_Compress       | ?      | Realistic           |           155.07 ms |          28.783 ms |       1.578 ms |             ? |         ? |         - |         - |           - |   108.77 MB |
+| CompressionBenchmark | GZip_Fastest_Compress  | ?      | Realistic           |           274.67 ms |          35.763 ms |       1.960 ms |             ? |         ? |         - |         - |           - |   163.42 MB |
+| CompressionBenchmark | Zstd_L3_Compress       | ?      | Realistic           |           340.70 ms |          29.903 ms |       1.639 ms |             ? |         ? |         - |         - |           - |   108.98 MB |
+| CompressionBenchmark | GZip_Optimal_Compress  | ?      | Realistic           |         1,140.65 ms |         114.803 ms |       6.293 ms |             ? |         ? |         - |         - |           - |    93.92 MB |
+| CompressionBenchmark | Zstd_L9_Compress       | ?      | Realistic           |         1,495.72 ms |         912.136 ms |      49.997 ms |             ? |         ? |         - |         - |           - |   107.01 MB |
+| CompressionBenchmark | GZip_Smallest_Compress | ?      | Realistic           |         2,138.92 ms |       1,099.788 ms |      60.283 ms |             ? |         ? |         - |         - |           - |    93.59 MB |
+|                      |                        |        |                     |                     |                    |                |               |           |           |           |             |             |
+| SelectColumn         | SelectDate             | 100000 |  16,896,454.1667 ns |   3,352,928.7495 ns |    183,785.3395 ns |           0.57 |          0.01 |  375.0000 |   93.7500 |   93.7500 |   2945421 B |        1.00 |
+| SelectColumn         | SelectFloat64          | 100000 |  21,081,669.7917 ns |   6,818,029.5168 ns |    373,719.2057 ns |           0.71 |          0.01 |  375.0000 |   93.7500 |   93.7500 |   2945809 B |        1.00 |
+| SelectColumn         | SelectString           | 100000 |  22,136,212.5000 ns |   8,701,905.4663 ns |    476,980.8038 ns |           0.75 |          0.02 |  593.7500 |  125.0000 |  125.0000 |   4545677 B |        1.54 |
+| SelectColumn         | SelectInt64            | 100000 |  25,506,839.5833 ns |   4,611,900.0855 ns |    252,793.8069 ns |           0.86 |          0.01 |  375.0000 |   93.7500 |   93.7500 |   2945366 B |        1.00 |
+| SelectColumn         | SelectUInt64           | 100000 |  26,302,192.7083 ns |   7,036,724.1077 ns |    385,706.5943 ns |           0.89 |          0.01 |  375.0000 |   93.7500 |   93.7500 |   2945422 B |        1.00 |
+| SelectColumn         | SelectUInt32           | 100000 |  29,233,119.7917 ns |   5,655,600.3725 ns |    310,002.5416 ns |           0.99 |          0.01 |  406.2500 |  125.0000 |  125.0000 |   2945880 B |        1.00 |
+| SelectColumn         | SelectInt32            | 100000 |  29,604,471.8750 ns |   4,912,049.9758 ns |    269,246.0352 ns |           1.00 |          0.01 |  406.2500 |  125.0000 |  125.0000 |   2946017 B |        1.00 |
+| SelectColumn         | SelectDate32           | 100000 |  30,144,518.7500 ns |   5,089,595.1574 ns |    278,977.8858 ns |           1.02 |          0.01 |  375.0000 |   93.7500 |   93.7500 |   2945624 B |        1.00 |
+| SelectColumn         | SelectNullableInt32    | 100000 |  30,881,350.0000 ns |   7,612,264.7657 ns |    417,253.9199 ns |           1.04 |          0.01 |  406.2500 |  125.0000 |  125.0000 |   2946472 B |        1.00 |
+| SelectColumn         | SelectFloat32          | 100000 |  31,050,395.8333 ns |   6,334,056.3898 ns |    347,191.0054 ns |           1.05 |          0.01 |  375.0000 |   93.7500 |   93.7500 |   2945895 B |        1.00 |
+| SelectColumn         | SelectDateTime         | 100000 |  33,253,451.0417 ns |  10,701,041.8515 ns |    586,560.2153 ns |           1.12 |          0.02 |  375.0000 |   93.7500 |   93.7500 |   2945982 B |        1.00 |
+| SelectColumn         | SelectTuple            | 100000 |  34,008,044.4444 ns |  17,472,595.0013 ns |    957,731.8945 ns |           1.15 |          0.03 | 1600.0000 |  133.3333 |   66.6667 |  13354225 B |        4.53 |
+| SelectColumn         | SelectDecimal64        | 100000 |  40,108,841.0256 ns |   5,067,722.8145 ns |    277,778.9889 ns |           1.35 |          0.01 |  769.2308 |         - |         - |   7059211 B |        2.40 |
+| SelectColumn         | SelectDecimal128       | 100000 |  44,051,241.6667 ns |  13,484,667.1845 ns |    739,140.1133 ns |           1.49 |          0.02 | 1250.0000 |         - |         - |  11059981 B |        3.75 |
+| SelectColumn         | SelectDecimal256       | 100000 |  45,638,790.9091 ns |   9,858,311.5266 ns |    540,367.3223 ns |           1.54 |          0.02 | 1363.6364 |         - |         - |  12659538 B |        4.30 |
+| SelectColumn         | SelectArray            | 100000 |  47,902,605.1282 ns |  47,266,087.0403 ns |  2,590,813.7334 ns |           1.62 |          0.08 | 1461.5385 |   76.9231 |   76.9231 |  12546801 B |        4.26 |
+| BulkInsertColumn     | BulkInsertInt32        | 100000 | 631,001,533.3333 ns | 595,968,840.6845 ns | 32,667,063.2969 ns |          21.32 |          0.97 |         - |         - |         - |   6928912 B | 
