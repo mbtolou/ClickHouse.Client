@@ -3,10 +3,7 @@
 > A **performance-optimized fork** of [DarkWanderer/ClickHouse.Client](https://github.com/DarkWanderer/ClickHouse.Client) — the unofficial ADO.NET client for [ClickHouse](https://clickhouse.com).
 > Full API compatibility with upstream, with substantial throughput improvements and new capabilities.
 
-[![NuGet](https://img.shields.io/nuget/v/[YOUR.PACKAGE.NAME]?label=NuGet)](https://www.nuget.org/packages/[YOUR.PACKAGE.NAME]/)
-[![Downloads](https://img.shields.io/nuget/dt/[YOUR.PACKAGE.NAME])](https://www.nuget.org/packages/[YOUR.PACKAGE.NAME]/)
-[![License](https://img.shields.io/github/license/[YOUR-USER]/[YOUR-REPO])](LICENSE)
-[![Tests](https://github.com/[YOUR-USER]/[YOUR-REPO]/actions/workflows/tests.yml/badge.svg)](https://github.com/[YOUR-USER]/[YOUR-REPO]/actions/workflows/tests.yml)
+
 
 > ⚠️ **Unofficial.** Not affiliated with or endorsed by ClickHouse, Inc. Based on the excellent work of [Oleg V. Kozlyuk](https://github.com/DarkWanderer).
 
