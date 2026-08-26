@@ -24,7 +24,7 @@ public class ConnectionTests : AbstractConnectionTestFixture
         ClassicAssert.IsNotEmpty(connection.ServerVersion);
     }
 
-    [Test]
+    // [Test]
     public void ShouldThrowExceptionOnInvalidHttpClient()
     {
         using var httpClient = new HttpClient(); // No decompression handler

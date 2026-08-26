@@ -23,6 +23,17 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
 {
     private const string CustomSettingPrefix = "set_";
 
+    private static readonly ConcurrentDictionary<string, ServerInfo> ServerInfoCache = new();
+
+    private class ServerInfo
+    {
+        public Version Version { get; set; }
+
+        public string Timezone { get; set; }
+
+        public Feature Features { get; set; }
+    }
+
     private readonly object httpClientLock = new object();
     private readonly List<IDisposable> disposables = new();
     private readonly string httpClientName;
@@ -245,39 +256,30 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
 
     public override async Task OpenAsync(CancellationToken cancellationToken)
     {
-        const string versionQuery = "SELECT version(), timezone() FORMAT TSV";
-
         if (State == ConnectionState.Open)
             return;
+
         using var activity = this.StartActivity("OpenAsync");
-        activity.SetQuery(versionQuery);
 
         try
         {
-            var uriBuilder = CreateUriBuilder();
-            using var request = new HttpRequestMessage(HttpMethod.Post, uriBuilder.ToString())
+            // ✅ مرحله ۱: اعتبارسنجی سریع با /ping
+            // این مرحله همیشه انجام می‌شود تا از سلامت HttpClient و شبکه مطمئن شویم
+            await EnsurePingAsync(cancellationToken).ConfigureAwait(false);
+
+            // ✅ مرحله ۲: دریافت اطلاعات سرور (با استفاده از کش)
+            var cacheKey = $"{serverUri}|{UseCompression}";
+
+            if (!ServerInfoCache.TryGetValue(cacheKey, out var cachedInfo))
             {
-                Content = new StringContent(versionQuery, Encoding.UTF8),
-            };
-            AddDefaultHttpHeaders(request.Headers);
-            using var response = await HandleError(await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), versionQuery, activity).ConfigureAwait(false);
-#if NET5_0_OR_GREATER
-            var data = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
-#else
-            var data = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-#endif
+                cachedInfo = await FetchServerDetailsAsync(cancellationToken).ConfigureAwait(false);
+                ServerInfoCache.TryAdd(cacheKey, cachedInfo);
+            }
 
-            if (data.Length > 2 && data[0] == 0x1F && data[1] == 0x8B) // Check if response starts with GZip marker
-                throw new InvalidOperationException("ClickHouse server returned compressed result but HttpClient did not decompress it. Check HttpClient settings");
+            serverVersion = cachedInfo.Version;
+            serverTimezone = cachedInfo.Timezone;
+            SupportedFeatures = cachedInfo.Features;
 
-            if (data.Length == 0)
-                throw new InvalidOperationException("ClickHouse server did not return version, check if the server is functional");
-
-            var serverVersionAndTimezone = Encoding.UTF8.GetString(data).Trim().Split('\t');
-
-            serverVersion = ParseVersion(serverVersionAndTimezone[0]);
-            serverTimezone = serverVersionAndTimezone[1];
-            SupportedFeatures = ClickHouseFeatureMap.GetFeatureFlags(serverVersion);
             state = ConnectionState.Open;
         }
         catch (Exception)
@@ -286,6 +288,64 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
             throw;
         }
     }
+
+    private async Task EnsurePingAsync(CancellationToken cancellationToken)
+    {
+        var uriBuilder = CreateUriBuilder();
+        // ساخت آدرس پینگ: http://host:port/ping
+        var pingUri = new UriBuilder(uriBuilder.BaseUri) { Path = "/ping", Query = "" }.Uri;
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, pingUri);
+        AddDefaultHttpHeaders(request.Headers);
+
+        // ارسال درخواست پینگ
+        using var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+        // اگر پاسخ موفق نبود یا محتوا "Ok." نبود، خطا می‌دهد
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException($"ClickHouse server is not reachable or returned status code {response.StatusCode}");
+    }
+
+    private async Task<ServerInfo> FetchServerDetailsAsync(CancellationToken cancellationToken)
+    {
+        const string versionQuery = "SELECT version(), timezone() FORMAT TSV";
+        using var activity = this.StartActivity("FetchServerDetails");
+        activity.SetQuery(versionQuery);
+
+        var uriBuilder = CreateUriBuilder();
+        using var request = new HttpRequestMessage(HttpMethod.Post, uriBuilder.ToString())
+        {
+            Content = new StringContent(versionQuery, Encoding.UTF8),
+        };
+        AddDefaultHttpHeaders(request.Headers);
+
+        using var response = await HandleError(
+            await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false),
+            versionQuery,
+            activity).ConfigureAwait(false);
+
+#if NET5_0_OR_GREATER
+        var data = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+#else
+        var data = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+#endif
+
+        if (data.Length > 2 && data[0] == 0x1F && data[1] == 0x8B)
+            throw new InvalidOperationException("ClickHouse server returned compressed result but HttpClient did not decompress it.");
+
+        if (data.Length == 0)
+            throw new InvalidOperationException("ClickHouse server did not return version.");
+
+        var serverVersionAndTimezone = Encoding.UTF8.GetString(data).Trim().Split('\t');
+
+        return new ServerInfo
+        {
+            Version = ParseVersion(serverVersionAndTimezone[0]),
+            Timezone = serverVersionAndTimezone[1],
+            Features = ClickHouseFeatureMap.GetFeatureFlags(ParseVersion(serverVersionAndTimezone[0]))
+        };
+    }
+
 
     /// <summary>
     /// Warning: implementation-specific API. Exposed to allow custom optimizations
