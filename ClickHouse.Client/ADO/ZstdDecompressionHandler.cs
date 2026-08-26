@@ -19,49 +19,39 @@ internal class ZstdDecompressionHandler : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
+        // بررسی دقیق هدر Content-Encoding
         if (response.Content.Headers.ContentEncoding.Any(e =>
             e.Equals("zstd", StringComparison.OrdinalIgnoreCase)))
         {
-            var originalContent = response.Content;
-            Stream compressedStream = null;
-            DecompressionStream decompressedStream = null;
+            // دریافت استریم فشرده از محتوای اصلی
+            var compressedStream = await response.Content
+                .ReadAsStreamAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-            try
+            // ایجاد استریم Decompress
+            // نکته: DecompressionStream به طور خودکار compressedStream را مدیریت می‌کند
+            var decompressedStream = new DecompressionStream(compressedStream);
+
+            // ساخت محتوای جدید. 
+            // نکته مهم: باید به StreamContent بگوییم که استریم را خودش Dispose کند
+            var newContent = new StreamContent(decompressedStream);
+
+            // انتقال هدرها
+            foreach (var header in response.Content.Headers)
             {
-                // دریافت استریم فشرده
-                compressedStream = await originalContent
-                    .ReadAsStreamAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                // ایجاد لایه Decompress
-                decompressedStream = new DecompressionStream(compressedStream);
-
-                // ساخت محتوای جدید
-                var newContent = new StreamContent(decompressedStream);
-
-                // انتقال هدرها (به جز موارد فشرده‌سازی)
-                foreach (var header in originalContent.Headers)
+                if (!header.Key.Equals("Content-Encoding", StringComparison.OrdinalIgnoreCase) &&
+                    !header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!header.Key.Equals("Content-Encoding", StringComparison.OrdinalIgnoreCase) &&
-                        !header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase))
-                    {
-                        newContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                    }
+                    newContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
-
-                // جایگزینی محتوا
-                response.Content = newContent;
-
-                // آزادسازی منبع اصلی پس از جایگزینی موفق
-                originalContent.Dispose();
             }
-            catch
-            {
-                // پاکسازی منابع در صورت بروز خطا
-                decompressedStream?.Dispose();
-                compressedStream?.Dispose();
-                throw;
-            }
+
+            // جایگزینی محتوا
+            response.Content = newContent;
+
+            // ⚠️ نکته کلیدی: اینجا نباید originalContent را دستی Dispose کنیم!
+            // زیرا ممکن است استریم زیرین را ببندد. 
+            // اجازه دهید Garbage Collector و Dispose نهایی response کار خود را انجام دهند.
         }
 
         return response;
