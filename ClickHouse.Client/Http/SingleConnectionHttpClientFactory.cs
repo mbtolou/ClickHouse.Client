@@ -9,13 +9,10 @@ internal class SingleConnectionHttpClientFactory : IHttpClientFactory, IDisposab
 {
     private readonly HttpClientHandler handler;
     private readonly ZstdDecompressionHandler zstdHandler;
-    private readonly ClickHouseCompression compression;
     public TimeSpan Timeout { get; init; }
 
     public SingleConnectionHttpClientFactory(ClickHouseCompression compression = ClickHouseCompression.Zstd)
     {
-        this.compression = compression;
-
         handler = new HttpClientHandler()
         {
             MaxConnectionsPerServer = 1,
@@ -41,7 +38,7 @@ internal class SingleConnectionHttpClientFactory : IHttpClientFactory, IDisposab
 
     public HttpClient CreateClient(string name)
     {
-        var effectiveHandler = (HttpMessageHandler?)zstdHandler ?? handler;
+        var effectiveHandler = (HttpMessageHandler)zstdHandler ?? handler;
         return new HttpClient(effectiveHandler, false) { Timeout = Timeout };
     }
 

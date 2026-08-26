@@ -23,6 +23,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
 {
     private const string CustomSettingPrefix = "set_";
 
+    private readonly object httpClientLock = new object();
     private readonly List<IDisposable> disposables = new();
     private readonly string httpClientName;
     private readonly ConcurrentDictionary<string, object> customSettings = new ConcurrentDictionary<string, object>();
@@ -33,6 +34,8 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
     private IHttpClientFactory providedHttpClientFactory;
     // Actually used value
     private IHttpClientFactory httpClientFactory;
+
+    private HttpClient cachedHttpClient;
 
     private Version serverVersion;
     private string serverTimezone;
@@ -173,6 +176,12 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
 
     private void ResetHttpClientFactory()
     {
+        lock (httpClientLock)
+        {
+            cachedHttpClient?.Dispose();
+            cachedHttpClient = null;
+        }
+
         // If current httpClientFactory is owned by this connection, dispose of it
         if (httpClientFactory is IDisposable d && disposables.Contains(d))
         {
@@ -246,12 +255,12 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
         try
         {
             var uriBuilder = CreateUriBuilder();
-            var request = new HttpRequestMessage(HttpMethod.Post, uriBuilder.ToString())
+            using var request = new HttpRequestMessage(HttpMethod.Post, uriBuilder.ToString())
             {
                 Content = new StringContent(versionQuery, Encoding.UTF8),
             };
             AddDefaultHttpHeaders(request.Headers);
-            var response = await HandleError(await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), versionQuery, activity).ConfigureAwait(false);
+            using var response = await HandleError(await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), versionQuery, activity).ConfigureAwait(false);
 #if NET5_0_OR_GREATER
             var data = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
 #else
@@ -289,7 +298,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
     /// <returns>Task-wrapped HttpResponseMessage object</returns>
     public async Task PostStreamAsync(string sql, Stream data, bool isCompressed, CancellationToken token)
     {
-        var content = new StreamContent(data);
+        using var content = new StreamContent(data);
         await PostStreamAsync(sql, content, isCompressed, token).ConfigureAwait(false);
     }
 
@@ -304,7 +313,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
     /// <returns>Task-wrapped HttpResponseMessage object</returns>
     public async Task PostStreamAsync(string sql, Func<Stream, CancellationToken, Task> callback, bool isCompressed, CancellationToken token)
     {
-        var content = new StreamCallbackContent(callback, token);
+        using var content = new StreamCallbackContent(callback, token);
         await PostStreamAsync(sql, content, isCompressed, token).ConfigureAwait(false);
     }
 
@@ -340,8 +349,19 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
     void IDisposable.Dispose()
     {
         GC.SuppressFinalize(this);
+
+        // ✅ Dispose cached HttpClient
+        lock (httpClientLock)
+        {
+            cachedHttpClient?.Dispose();
+            cachedHttpClient = null;
+        }
+
         foreach (var d in disposables)
             d.Dispose();
+
+        disposables.Clear();
+        customSettings.Clear();
     }
 
     internal static Version ParseVersion(string versionString)
@@ -356,7 +376,20 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
         return new Version(parts.ElementAtOrDefault(0), parts.ElementAtOrDefault(1), parts.ElementAtOrDefault(2), parts.ElementAtOrDefault(3));
     }
 
-    internal HttpClient HttpClient => httpClientFactory.CreateClient(httpClientName);
+
+
+    internal HttpClient HttpClient
+    {
+        get
+        {
+            if (cachedHttpClient != null) return cachedHttpClient;
+            lock (httpClientLock)
+            {
+                cachedHttpClient ??= httpClientFactory.CreateClient(httpClientName);
+                return cachedHttpClient;
+            }
+        }
+    }
 
     internal TypeSettings TypeSettings => new TypeSettings(useCustomDecimals, useServerTimezone ? serverTimezone : TypeSettings.DefaultTimezone);
 
@@ -433,6 +466,7 @@ public class ClickHouseConnection : DbConnection, IClickHouseConnection, IClonea
             useCustomDecimals = builder.UseCustomDecimals;
             useCustomDecimals = builder.UseCustomDecimals;
 
+            customSettings.Clear();
             foreach (var key in builder.Keys.Cast<string>().Where(k => k.StartsWith(CustomSettingPrefix, true, CultureInfo.InvariantCulture)))
             {
                 CustomSettings.Set(key.Replace(CustomSettingPrefix, string.Empty), builder[key]);
